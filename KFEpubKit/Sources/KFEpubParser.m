@@ -233,20 +233,25 @@
         DDXMLElement *spineElement = spineNodes[0];
         
         NSString *toc = [[spineElement attributeForName:@"toc"] stringValue];
-        if (toc)
-        {
-            [spine addObject:toc];
-        }
-        else
-        {
-            [spine addObject:@""];
-        }
+        [spine addObject:@{@"toc":toc?toc:@""}];
         NSArray *spineElements = spineElement.children;
         for (DDXMLElement* xmlElement in spineElements)
         {
             if ([self isValidNode:xmlElement])
             {
-                [spine addObject:[[xmlElement attributeForName:@"idref"] stringValue]];
+                NSString *idref = [[xmlElement attributeForName:@"idref"] stringValue];
+                NSString *properties = [[xmlElement attributeForName:@"properties"] stringValue];
+                NSString *linearStr = [[xmlElement attributeForName:@"linear"] stringValue];
+                BOOL linear = false;
+                if (linearStr)
+                    if ([linearStr.lowercaseString isEqualToString:@"yes"] ||
+                        [linearStr.lowercaseString isEqualToString:@"true"])
+                        linear = true;
+                if (!properties)
+                    properties = @"";
+                [spine addObject:@{@"idref":idref,
+                                   @"properties":properties,
+                                   @"linear":[NSNumber numberWithBool:linear]}];
             }
         }
     }
